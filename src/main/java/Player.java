@@ -5,6 +5,7 @@ class Player implements Runnable
 {
     private int number;
     protected final BlockingQueue<String> queue;
+    protected final String POISON_PILL="POISON";
 
     // Please aware that integer field may overflow during prolonged run
     // of the program. So after 2147483647 we'll get -2147483648. We can
@@ -23,27 +24,24 @@ class Player implements Runnable
     @Override
     public void run()
     {
-        while (getMessagesNumber()<10)
-        {
-            String receivedMessage = receive();
-            reply(receivedMessage);
-        }
+            while (getMessagesNumber() < 10) {
+                String receivedMessage = receive();
+                if (receivedMessage.equals(POISON_PILL) ) break;
+                reply(receivedMessage);
+            }
+
     }
 
     protected String receive()
     {
-        String receivedMessage;
+        String receivedMessage="";
         try
         {
-            // Take message from the queue if available or wait otherwise.
             receivedMessage = queue.take();
         }
-        catch (InterruptedException interrupted)
+        catch (InterruptedException e)
         {
-            String error = String.format(
-                    "Player [%s] failed to receive message on iteration [%d].",
-                    this, messagesNumber);
-            throw new IllegalStateException(error, interrupted);
+
         }
         return receivedMessage;
     }
@@ -53,24 +51,18 @@ class Player implements Runnable
         String reply = receivedMessage + " " + messagesNumber;
         try
         {
-            // Send message if the queue is not full or wait until one message
-            // can fit.
             queue.put(reply);
             System.out.printf("Player " + this.getNumber() + " sent message " + reply + " successfully %n");
-            reply="";
             messagesNumber++;
 
-            // All players will work fine without this delay. It placed here just
-            // for slowing the console output down.
-            Thread.sleep(1500);
+            Thread.sleep(500);
+
         }
-        catch (InterruptedException interrupted)
+        catch (InterruptedException e)
         {
-            String error = String.format(
-                    "Player [%s] failed to send message [%s] on iteration [%d].",
-                    this, reply, messagesNumber);
-            throw new IllegalStateException(error);
+
         }
+
     }
 
     protected int getNumber() {

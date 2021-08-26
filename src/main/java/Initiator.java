@@ -4,6 +4,7 @@ class Initiator extends Player {
 
     private static final String INIT_MESSAGE = "initiator";
 
+
     public Initiator(BlockingQueue<String> sent, int number) {
         super(sent, number);
     }
@@ -11,24 +12,31 @@ class Initiator extends Player {
     @Override
     public void run() {
         sendInitMessage();
-        while (getMessagesNumber()<10) {
+
+        while (getMessagesNumber()<11) {
             String receivedMessage = receive();
             reply(receivedMessage);
         }
+        try {
+            queue.put(POISON_PILL);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
     }
 
     private void sendInitMessage() {
-        String InitMessage= INIT_MESSAGE + " " + getMessagesNumber();
+//        String InitMessage= INIT_MESSAGE;
+
         try {
-            queue.put(InitMessage);
-            System.out.printf("Player " + this.getNumber() + " sent message " + InitMessage + " successfully %n");
-            incrementMessagesNumber();
-        } catch (InterruptedException interrupted) {
-            String error = String.format(
-                    "Player [%s] failed to sent message [%s].",
-                    this, InitMessage);
-            throw new IllegalStateException(error, interrupted);
+                queue.put(INIT_MESSAGE);
+                System.out.printf("Player " + this.getNumber() + " sent message " + INIT_MESSAGE + " successfully %n");
+                incrementMessagesNumber();
+
+        } catch (InterruptedException e) {
+
         }
+
     }
 
 }
