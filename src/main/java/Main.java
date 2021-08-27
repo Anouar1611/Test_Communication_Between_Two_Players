@@ -2,21 +2,24 @@ import java.util.concurrent.*;
 
 public class Main
 {
-    // Blocking queue looks superfluous for single message. But such a queue saves us from cumbersome
-    // synchronization of the threads.
 
-    public static void main(String[] args)
-    {
-        ExecutorService executor = Executors.newFixedThreadPool(2);
+    public static void main(String[] args) throws InterruptedException {
+
         BlockingQueue<String> queue = new SynchronousQueue<String>(true);
 
-        Initiator firstPlayer = new Initiator(queue, 1);
-        Player secondPlayer = new Player(queue,2);
+        Initiator firstPlayer = new Initiator(queue, "Initiator");
+        SecondPlayer secondPlayer = new SecondPlayer(queue,"Second");
 
-        executor.execute(firstPlayer);
-        executor.execute(secondPlayer);
+        Thread th1 = new Thread(firstPlayer);
+        th1.start();
+        Thread th2 = new Thread(secondPlayer);
+        th2.start();
 
-        executor.shutdown();
+        Thread.sleep(10000);
+
+        th1.stop();
+        th2.stop();
+
 
 
     }

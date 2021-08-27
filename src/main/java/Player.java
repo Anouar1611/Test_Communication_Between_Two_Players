@@ -1,59 +1,26 @@
-import java.math.BigInteger;
 import java.util.concurrent.BlockingQueue;
 
-class Player implements Runnable
+class Player
 {
-    private int number;
+    protected String name;
     protected final BlockingQueue<String> queue;
-    protected final String POISON_PILL="POISON";
-
-    // Please aware that integer field may overflow during prolonged run
-    // of the program. So after 2147483647 we'll get -2147483648. We can
-    // either use BigInteger or compare the field with Integer.MAX_VALUE
-    // before each increment.
-    //
-    // Let's choose BigInteger for simplicity.
     private int messagesNumber = 0;
 
-    public Player(BlockingQueue<String> queue, int number)
+    public Player(BlockingQueue<String> queue, String name)
     {
         this.queue = queue;
-        this.number=number;
+        this.name=name;
     }
 
-    @Override
-    public void run()
-    {
-            while (getMessagesNumber() < 10) {
-                String receivedMessage = receive();
-                if (receivedMessage.equals(POISON_PILL) ) break;
-                reply(receivedMessage);
-            }
 
-    }
-
-    protected String receive()
+    protected void replyMessage(String message)
     {
-        String receivedMessage="";
+        String messageOfReply = message + " " + messagesNumber;
         try
         {
-            receivedMessage = queue.take();
-        }
-        catch (InterruptedException e)
-        {
-
-        }
-        return receivedMessage;
-    }
-
-    protected void reply(String receivedMessage)
-    {
-        String reply = receivedMessage + " " + messagesNumber;
-        try
-        {
-            queue.put(reply);
-            System.out.printf("Player " + this.getNumber() + " sent message " + reply + " successfully %n");
-            messagesNumber++;
+            queue.put(messageOfReply);
+            System.out.printf(this.getName() + " player sent : " + messageOfReply + " successfully %n");
+            incrementMessagesNumber();
 
             Thread.sleep(500);
 
@@ -65,12 +32,29 @@ class Player implements Runnable
 
     }
 
-    protected int getNumber() {
-        return number;
+
+
+    protected String receiveMessage()
+    {
+        String message="";
+        try
+        {
+            message = queue.take();
+        }
+        catch (InterruptedException e)
+        {
+
+        }
+        return message;
     }
 
-    protected void setNumber(int number) {
-        this.number = number;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     protected int getMessagesNumber() {
