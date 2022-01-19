@@ -1,3 +1,5 @@
+package me.anouar;
+
 import java.util.concurrent.*;
 
 public class Main

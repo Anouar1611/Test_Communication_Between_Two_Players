@@ -1,3 +1,5 @@
+package me.anouar;
+
 import java.util.concurrent.BlockingQueue;
 
 public class SecondPlayer extends Player implements Runnable{
